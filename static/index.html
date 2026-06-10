@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CBI Tennis Parser Widget</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7;
+    --ok: #3fb950; --err: #f85149; --warn: #d29922;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px; margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 15px; margin: 0 0 4px; }
+  .panel .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 16px; }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .cols2 { grid-template-columns: 1fr; } }
+  .card {
+    border: 1px solid var(--border); border-radius: 6px; padding: 14px;
+  }
+  .card h3 { font-size: 13px; margin: 0 0 10px; color: var(--accent); }
+  label { display: block; font-size: 11.5px; color: var(--muted); margin: 10px 0 3px; }
+  input, select, textarea {
+    width: 100%; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px;
+    font: inherit;
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  button {
+    background: var(--accent); color: #fff; border: 0; border-radius: 6px;
+    padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer;
+    margin-top: 14px;
+  }
+  button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  button:disabled { opacity: .5; cursor: wait; }
+  .status { font-size: 12.5px; margin-top: 8px; min-height: 18px; }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; font-size: 11.5px; }
+  .placement-chip { color: var(--accent); white-space: nowrap; }
+  .checkline { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; }
+  .checkline input { width: auto; }
+  #output {
+    border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+    padding: 18px; margin-top: 14px; white-space: pre-wrap;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 1.6; min-height: 60px;
+    overflow-x: auto;
+  }
+  #output:empty::before { content: "The read will populate here."; color: var(--muted); }
+  .out-actions { display: flex; gap: 10px; }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CBI Tennis Parser Widget</h1>
+  <p class="sub">Declare both Parsers, then run the read. Placements come from upstream identification — this tool never sources them. No placement, no read.</p>
+
+  <!-- 1: declare both parsers, side by side -->
+  <div class="panel">
+    <h2>1 — Declare the Parser placements</h2>
+    <p class="hint">Both players must be declared before a read will run. Each side submits independently, so you can re-declare one without touching the other.</p>
+    <div class="cols2">
+      <div class="card" id="declare-a"></div>
+      <div class="card" id="declare-b"></div>
+    </div>
+  </div>
+
+  <!-- declared placements store -->
+  <div class="panel">
+    <h2>Declared placements</h2>
+    <p class="hint">The external store the read consults.</p>
+    <div id="placements">None yet.</div>
+    <button class="secondary" onclick="refreshPlacements()">Refresh</button>
+  </div>
+
+  <!-- 2: run the read -->
+  <div class="panel">
+    <h2>2 — Run a match read</h2>
+    <p class="hint">Pick the two declared players, describe live conditions, paste the intake sheet if you have one. The read refuses if a Parser is missing.</p>
+    <div class="row2">
+      <div>
+        <label>Player A</label>
+        <select id="player-a"></select>
+      </div>
+      <div>
+        <label>Player B</label>
+        <select id="player-b"></select>
+      </div>
+    </div>
+    <label>Conditions (live surface / weather)</label>
+    <input id="conditions" placeholder="e.g. red clay, cool damp evening">
+    <label>Score (optional — last pair = current set)</label>
+    <input id="score" placeholder="e.g. 6-4 2-1">
+    <label>Intake sheet (optional)</label>
+    <textarea id="intake" placeholder="Paste the completed intel intake here…"></textarea>
+    <div class="checkline">
+      <input type="checkbox" id="with-market">
+      <label for="with-market" style="margin:0">Include market comparison this turn</label>
+    </div>
+    <button id="run-btn" onclick="runRead()">Run read</button>
+    <div class="status" id="read-status"></div>
+  </div>
+
+  <!-- 3: output -->
+  <div class="panel">
+    <h2>3 — Read output</h2>
+    <div id="output"></div>
+    <div class="out-actions">
+      <button class="secondary" onclick="copyOutput()">Copy</button>
+      <button class="secondary" onclick="logRead()">Log it</button>
+    </div>
+    <div class="status" id="log-status"></div>
+  </div>
+</div>
+
+<script>
+const AXES = {
+  spatial: ["Concrete", "Balanced", "Abstract"],
+  temporal: ["Past", "Present", "Future"],
+  reference: ["Self", "Balanced", "Other"],
+};
+const METHODS = ["independence", "user-declared", "interview", "archival"];
+const TIERS = ["PROVISIONAL", "DECLARED", "CORROBORATED"];
+
+function options(list) {
+  return list.map(v => `<option>${v}</option>`).join("");
+}
+
+function declareCard(side, title) {
+  return `
+    <h3>${title}</h3>
+    <label>Player name</label>
+    <input id="${side}-name" placeholder="e.g. Hugo Grenier">
+    <div class="row3">
+      <div><label>Spatial</label><select id="${side}-spatial">${options(AXES.spatial)}</select></div>
+      <div><label>Temporal</label><select id="${side}-temporal">${options(AXES.temporal)}</select></div>
+      <div><label>Reference</label><select id="${side}-reference">${options(AXES.reference)}</select></div>
+    </div>
+    <div class="row2">
+      <div><label>Sourcing method</label><select id="${side}-method">${options(METHODS)}</select></div>
+      <div><label>Tier</label><select id="${side}-tier">${options(TIERS)}</select></div>
+    </div>
+    <div class="row2">
+      <div><label>Evidence domains (comma-separated)</label><input id="${side}-domains" placeholder="speech,tactical"></div>
+      <div><label>Date</label><input id="${side}-date" type="date"></div>
+    </div>
+    <label>Declared by</label>
+    <input id="${side}-by" placeholder="your name">
+    <button onclick="declare('${side}')">Declare ${title.toLowerCase()}</button>
+    <div class="status" id="${side}-status"></div>`;
+}
+
+document.getElementById("declare-a").innerHTML = declareCard("a", "Player A");
+document.getElementById("declare-b").innerHTML = declareCard("b", "Player B");
+
+function setStatus(id, msg, cls) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "status " + (cls || "");
+}
+
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: body ? "POST" : "GET",
+    headers: body ? { "Content-Type": "application/json" } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  return data;
+}
+
+async function declare(side) {
+  const v = id => document.getElementById(`${side}-${id}`).value.trim();
+  if (!v("name")) { setStatus(`${side}-status`, "Player name is required.", "err"); return; }
+  try {
+    const r = await api("/declare", {
+      player: v("name"), spatial: v("spatial"), temporal: v("temporal"),
+      reference: v("reference"), method: v("method"), tier: v("tier"),
+      domains: v("domains"), date: v("date"), declared_by: v("by"),
+    });
+    setStatus(`${side}-status`, `Declared: ${r.player} — ${r.placement} [${r.tier}]`, "ok");
+    refreshPlacements();
+  } catch (e) {
+    setStatus(`${side}-status`, e.message, "err");
+  }
+}
+
+async function refreshPlacements() {
+  try {
+    const data = await api("/show");
+    const players = data.players || {};
+    const names = Object.keys(players).sort();
+    const box = document.getElementById("placements");
+    if (!names.length) { box.textContent = "None yet — declare both players above."; }
+    else {
+      box.innerHTML = `<table><tr><th>Player</th><th>Placement</th><th>Tier</th><th>Date</th></tr>` +
+        names.map(n => {
+          const p = players[n];
+          return `<tr><td>${n}</td>
+            <td class="placement-chip">${p.spatial} • ${p.temporal} • ${p.reference}</td>
+            <td>${(p.provenance || {}).tier || ""}</td>
+            <td>${(p.provenance || {}).date || ""}</td></tr>`;
+        }).join("") + `</table>`;
+    }
+    for (const sel of ["player-a", "player-b"]) {
+      const el = document.getElementById(sel);
+      const cur = el.value;
+      el.innerHTML = `<option value="">— select —</option>` + options(names);
+      if (names.includes(cur)) el.value = cur;
+    }
+  } catch (e) {
+    document.getElementById("placements").textContent = "Could not load placements: " + e.message;
+  }
+}
+
+async function runRead() {
+  const a = document.getElementById("player-a").value;
+  const b = document.getElementById("player-b").value;
+  const conditions = document.getElementById("conditions").value.trim();
+  if (!a || !b) { setStatus("read-status", "Pick both players.", "err"); return; }
+  if (a === b) { setStatus("read-status", "Player A and Player B must differ.", "err"); return; }
+  if (!conditions) { setStatus("read-status", "Conditions are required (live surface / weather).", "err"); return; }
+  const btn = document.getElementById("run-btn");
+  btn.disabled = true;
+  setStatus("read-status", "Running read — two passes plus the drift gate; this can take a minute…");
+  document.getElementById("output").textContent = "";
+  try {
+    const r = await api("/read", {
+      player_a: a, player_b: b, conditions,
+      score: document.getElementById("score").value.trim() || null,
+      intake: document.getElementById("intake").value.trim() || null,
+      with_market: document.getElementById("with-market").checked,
+    });
+    document.getElementById("output").textContent = r.read;
+    setStatus("read-status", "Read complete — gate passed.", "ok");
+    document.getElementById("output").scrollIntoView({ behavior: "smooth" });
+  } catch (e) {
+    setStatus("read-status", e.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function copyOutput() {
+  const text = document.getElementById("output").textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text);
+  setStatus("log-status", "Copied to clipboard.", "ok");
+}
+
+async function logRead() {
+  try {
+    const r = await api("/log", { note: "" });
+    setStatus("log-status", "Logged to tracker.", "ok");
+  } catch (e) {
+    setStatus("log-status", e.message, "err");
+  }
+}
+
+refreshPlacements();
+</script>
+</body>
+</html>

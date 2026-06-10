@@ -19,9 +19,11 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parent
+STATIC = ROOT / "static"
 
 
 def _default_data_dir() -> Path:
@@ -88,6 +90,11 @@ class LogRequest(BaseModel):
 
 
 # -- endpoints ----------------------------------------------------------------
+
+
+@app.get("/")
+def index():
+    return FileResponse(STATIC / "index.html")
 
 
 @app.get("/health")
