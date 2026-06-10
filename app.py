@@ -33,8 +33,23 @@ def _default_data_dir() -> Path:
     return ROOT / "data"
 
 
-DATA = _default_data_dir()
-DATA.mkdir(parents=True, exist_ok=True)
+def _usable_data_dir() -> tuple[Path, str | None]:
+    """A bad DATA_DIR or unwritable volume must not kill the boot — fall back
+    to the ephemeral ./data and report the problem via /health instead."""
+    preferred = _default_data_dir()
+    try:
+        preferred.mkdir(parents=True, exist_ok=True)
+        probe = preferred / ".write_probe"
+        probe.write_text("")
+        probe.unlink()
+        return preferred, None
+    except OSError as e:
+        fallback = ROOT / "data"
+        fallback.mkdir(parents=True, exist_ok=True)
+        return fallback, f"{preferred} unusable ({e}); using ephemeral {fallback}"
+
+
+DATA, DATA_WARNING = _usable_data_dir()
 
 STORE_PATH = DATA / "placements.json"
 LAST_READ_PATH = DATA / "last_read.md"
@@ -95,6 +110,7 @@ def health():
     return {
         "status": "ok",
         "data_dir": str(DATA),
+        "data_warning": DATA_WARNING,
         "persistent": not DATA.is_relative_to(ROOT),
         "api_key_set": bool(os.environ.get("ANTHROPIC_API_KEY")),
     }
@@ -139,6 +155,13 @@ def read(req: ReadRequest):
     from cbi_widget.engine import LiveFrame, ReadEngine
     from cbi_widget.model import AnthropicAdapter
     from cbi_widget.placements import MissingParserError, PlacementStore, presence_gate
+
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail="ANTHROPIC_API_KEY is not set — add it in Service → Variables "
+                   "and redeploy. GET /health reports api_key_set.",
+        )
 
     store = PlacementStore(STORE_PATH)
     try:

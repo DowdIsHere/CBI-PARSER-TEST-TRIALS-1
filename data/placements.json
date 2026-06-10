@@ -1,3 +1,34 @@
 {
-  "players": {}
+  "players": {
+    "Kamil Majchrzak": {
+      "provenance": {
+        "date": "2026-06-06",
+        "declared_by": "Robert",
+        "domains": [
+          "speech",
+          "tactical"
+        ],
+        "method": "independence",
+        "tier": "CORROBORATED"
+      },
+      "reference": "Other",
+      "spatial": "Concrete",
+      "temporal": "Past"
+    },
+    "Otto Virtanen": {
+      "provenance": {
+        "date": "2026-06-06",
+        "declared_by": "Robert",
+        "domains": [
+          "speech",
+          "tactical"
+        ],
+        "method": "independence",
+        "tier": "CORROBORATED"
+      },
+      "reference": "Self",
+      "spatial": "Abstract",
+      "temporal": "Future"
+    }
+  }
 }
