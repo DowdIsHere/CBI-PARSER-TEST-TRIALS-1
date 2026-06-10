@@ -1,5 +1,61 @@
 {
   "players": {
+    "Alexandra Eala": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Other",
+      "spatial": "Abstract",
+      "temporal": "Future"
+    },
+    "Georgina Garcia Perez": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Abstract",
+      "temporal": "Future"
+    },
+    "Iva Jovic": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Concrete",
+      "temporal": "Past"
+    },
+    "Juliana Giaccio": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Balanced",
+      "spatial": "Concrete",
+      "temporal": "Present"
+    },
     "Kamil Majchrzak": {
       "provenance": {
         "date": "2026-06-06",
@@ -10,6 +66,20 @@
         ],
         "method": "independence",
         "tier": "CORROBORATED"
+      },
+      "reference": "Other",
+      "spatial": "Concrete",
+      "temporal": "Past"
+    },
+    "Liam Broady": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
       },
       "reference": "Other",
       "spatial": "Concrete",
@@ -29,6 +99,48 @@
       "reference": "Self",
       "spatial": "Abstract",
       "temporal": "Future"
+    },
+    "Raul Brancaccio": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Abstract",
+      "temporal": "Present"
+    },
+    "Francesco Forti": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Concrete",
+      "temporal": "Present"
+    },
+    "Franco Agamenone": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Other",
+      "spatial": "Concrete",
+      "temporal": "Past"
     }
   }
 }
