@@ -113,6 +113,34 @@
       "reference": "Self",
       "spatial": "Abstract",
       "temporal": "Present"
+    },
+    "Francesco Forti": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Concrete",
+      "temporal": "Present"
+    },
+    "Franco Agamenone": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Other",
+      "spatial": "Concrete",
+      "temporal": "Past"
     }
   }
 }
