@@ -125,6 +125,13 @@ def read(req: ReadRequest):
     from cbi_widget.model import AnthropicAdapter
     from cbi_widget.placements import MissingParserError, PlacementStore, presence_gate
 
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail="ANTHROPIC_API_KEY is not set — add it in Service → Variables "
+                   "and redeploy. GET /health reports api_key_set.",
+        )
+
     store = PlacementStore(STORE_PATH)
     try:
         presence_gate(store, req.player_a, req.player_b)
