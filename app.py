@@ -6,7 +6,9 @@ this file is pure routing.
 
 Environment variables required:
   ANTHROPIC_API_KEY   forwarded to AnthropicAdapter by the engine
-  DATA_DIR (optional) override for the data directory (default: ./data)
+  DATA_DIR (optional) override for the data directory. If unset, a Railway
+                      volume mounted at /data is used automatically when
+                      present; otherwise ./data (ephemeral).
 """
 
 from __future__ import annotations
@@ -20,7 +22,18 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parent
-DATA = Path(os.environ.get("DATA_DIR", ROOT / "data"))
+
+
+def _default_data_dir() -> Path:
+    if "DATA_DIR" in os.environ:
+        return Path(os.environ["DATA_DIR"])
+    volume = Path("/data")
+    if volume.is_dir():
+        return volume
+    return ROOT / "data"
+
+
+DATA = _default_data_dir()
 DATA.mkdir(parents=True, exist_ok=True)
 
 STORE_PATH = DATA / "placements.json"
@@ -60,6 +73,16 @@ class LogRequest(BaseModel):
 
 
 # -- endpoints ----------------------------------------------------------------
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "data_dir": str(DATA),
+        "persistent": not DATA.is_relative_to(ROOT),
+        "api_key_set": bool(os.environ.get("ANTHROPIC_API_KEY")),
+    }
 
 
 @app.post("/declare")
