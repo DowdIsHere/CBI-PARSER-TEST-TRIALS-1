@@ -14,6 +14,20 @@
       "spatial": "Abstract",
       "temporal": "Future"
     },
+    "Georgina Garcia Perez": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Abstract",
+      "temporal": "Future"
+    },
     "Iva Jovic": {
       "provenance": {
         "date": "2026-06-10",
@@ -27,6 +41,20 @@
       "reference": "Self",
       "spatial": "Concrete",
       "temporal": "Past"
+    },
+    "Juliana Giaccio": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Balanced",
+      "spatial": "Concrete",
+      "temporal": "Present"
     },
     "Kamil Majchrzak": {
       "provenance": {
