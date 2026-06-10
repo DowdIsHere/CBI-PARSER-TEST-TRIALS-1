@@ -75,6 +75,21 @@ class LogRequest(BaseModel):
 # -- endpoints ----------------------------------------------------------------
 
 
+@app.get("/")
+def index():
+    return {
+        "service": "CBI Tennis Parser Widget",
+        "endpoints": {
+            "GET /health": "service status",
+            "POST /declare": "record a user-declared placement",
+            "GET /show": "list declared placements",
+            "POST /read": "run a match read",
+            "POST /log": "append the last read to the tracker",
+            "GET /docs": "interactive API docs",
+        },
+    }
+
+
 @app.get("/health")
 def health():
     return {
