@@ -71,6 +71,20 @@
       "spatial": "Concrete",
       "temporal": "Past"
     },
+    "Liam Broady": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Other",
+      "spatial": "Concrete",
+      "temporal": "Past"
+    },
     "Otto Virtanen": {
       "provenance": {
         "date": "2026-06-06",
@@ -85,6 +99,20 @@
       "reference": "Self",
       "spatial": "Abstract",
       "temporal": "Future"
+    },
+    "Raul Brancaccio": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Abstract",
+      "temporal": "Present"
     }
   }
 }
