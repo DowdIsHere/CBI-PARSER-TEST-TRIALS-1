@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parent
@@ -92,6 +93,11 @@ class LogRequest(BaseModel):
 
 @app.get("/")
 def index():
+    return FileResponse(ROOT / "static" / "index.html")
+
+
+@app.get("/api")
+def api_index():
     return {
         "service": "CBI Tennis Parser Widget",
         "endpoints": {

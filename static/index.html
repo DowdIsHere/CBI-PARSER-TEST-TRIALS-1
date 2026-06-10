@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CBI Tennis Parser Widget</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #181b22; --panel2: #1f2430;
+    --text: #e8eaf0; --muted: #9aa3b2; --accent: #4f8cff;
+    --good: #3ecf8e; --warn: #f5a623; --bad: #ef5350; --border: #2a3040;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    padding: 22px 28px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; margin: 0; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  #statusbar { margin-left: auto; font-size: 13px; display: flex; gap: 14px; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+  .dot.good { background: var(--good); } .dot.bad { background: var(--bad); }
+  .dot.warn { background: var(--warn); }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  section {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px; margin-bottom: 20px;
+  }
+  section h2 { margin: 0 0 4px; font-size: 16px; }
+  section p.hint { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+  input, select, textarea {
+    width: 100%; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+    font: inherit; font-size: 14px;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  .row { display: flex; gap: 10px; } .row > div { flex: 1; }
+  button {
+    margin-top: 14px; background: var(--accent); color: #fff; border: 0;
+    border-radius: 6px; padding: 10px 18px; font: inherit; font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.1); }
+  button:disabled { opacity: .45; cursor: wait; }
+  button.secondary { background: var(--panel2); border: 1px solid var(--border); }
+  .placement-card {
+    background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 8px; font-size: 14px;
+  }
+  .placement-card b { color: var(--accent); }
+  .placement-card .meta { color: var(--muted); font-size: 12px; }
+  .msg { margin-top: 12px; font-size: 13px; padding: 10px 12px; border-radius: 6px; display: none; }
+  .msg.ok   { display: block; background: rgba(62,207,142,.12); color: var(--good); }
+  .msg.err  { display: block; background: rgba(239,83,80,.12);  color: var(--bad); white-space: pre-wrap; }
+  #read-output {
+    display: none; white-space: pre-wrap; background: var(--panel2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 18px;
+    margin-top: 16px; font-size: 14px; max-height: 600px; overflow: auto;
+  }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; }
+  .check input { width: auto; }
+  .spinner { display: none; margin-top: 14px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CBI Tennis Parser Widget</h1>
+  <span class="sub">Playbook v2.1 — execution tool, not analysis assistant</span>
+  <div id="statusbar">checking…</div>
+</header>
+
+<main>
+  <div class="grid">
+    <section>
+      <h2>1 · Declare a Parser placement</h2>
+      <p class="hint">Placements come from upstream identification (Parser Print
+      Identifier manual) — this tool never sources them. No placement, no read.</p>
+      <label>Player name</label>
+      <input id="d-player" placeholder="e.g. Hugo Grenier">
+      <div class="row">
+        <div><label>Spatial</label>
+          <select id="d-spatial"><option>Concrete</option><option>Balanced</option><option>Abstract</option></select></div>
+        <div><label>Temporal</label>
+          <select id="d-temporal"><option>Past</option><option>Present</option><option>Future</option></select></div>
+        <div><label>Reference</label>
+          <select id="d-reference"><option>Self</option><option>Balanced</option><option>Other</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Sourcing method</label>
+          <select id="d-method"><option>independence</option><option>control</option><option>volume-across-variation</option></select></div>
+        <div><label>Tier</label>
+          <select id="d-tier"><option>PROVISIONAL</option><option>CORROBORATED</option><option>LOCKED</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Evidence domains (comma-separated)</label>
+          <input id="d-domains" placeholder="speech,tactical"></div>
+        <div><label>Date</label><input id="d-date" type="date"></div>
+      </div>
+      <label>Declared by</label>
+      <input id="d-by" placeholder="your name">
+      <button id="d-btn" onclick="declarePlacement()">Declare placement</button>
+      <div id="d-msg" class="msg"></div>
+    </section>
+
+    <section>
+      <h2>Declared placements</h2>
+      <p class="hint">The external store the read consults. Both players must be
+      here before a read will run.</p>
+      <div id="placements"><span class="sub" style="color:var(--muted)">loading…</span></div>
+      <button class="secondary" onclick="loadPlacements()">Refresh</button>
+    </section>
+  </div>
+
+  <section>
+    <h2>2 · Run a match read</h2>
+    <p class="hint">Pick two declared players, describe live conditions, paste the
+    intake sheet if you have one. The read refuses if a Parser is missing.</p>
+    <div class="row">
+      <div><label>Player A</label><select id="r-a"></select></div>
+      <div><label>Player B</label><select id="r-b"></select></div>
+    </div>
+    <label>Conditions (live surface / weather)</label>
+    <input id="r-conditions" placeholder="e.g. red clay, cool damp evening">
+    <div class="row">
+      <div><label>Score (optional — last pair = current set)</label>
+        <input id="r-score" placeholder="e.g. 6-4 2-1"></div>
+    </div>
+    <label>Intake sheet (optional)</label>
+    <textarea id="r-intake" placeholder="Paste the completed intel intake here…"></textarea>
+    <div class="check">
+      <input type="checkbox" id="r-market"><label for="r-market" style="margin:0">Include market comparison this turn</label>
+    </div>
+    <button id="r-btn" onclick="runRead()">Run read</button>
+    <div class="spinner" id="r-spin">Running the read — intake pass, verdict pass, drift guard… this can take a minute.</div>
+    <div id="r-msg" class="msg"></div>
+    <div id="read-output"></div>
+    <button class="secondary" id="log-btn" style="display:none" onclick="logIt()">Log it</button>
+    <div id="log-msg" class="msg"></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function showMsg(id, text, ok) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+function clearMsg(id) { $(id).className = 'msg'; }
+
+async function api(path, opts) {
+  const res = await fetch(path, opts);
+  let body;
+  try { body = await res.json(); } catch { body = { detail: await res.text() }; }
+  if (!res.ok) throw new Error(body.detail || ('HTTP ' + res.status));
+  return body;
+}
+
+async function loadHealth() {
+  try {
+    const h = await api('/health');
+    $('statusbar').innerHTML =
+      `<span><span class="dot ${h.api_key_set ? 'good' : 'bad'}"></span>API key ${h.api_key_set ? 'set' : 'MISSING'}</span>` +
+      `<span><span class="dot ${h.persistent ? 'good' : 'warn'}"></span>storage ${h.persistent ? 'persistent' : 'ephemeral'}</span>`;
+  } catch (e) {
+    $('statusbar').innerHTML = `<span><span class="dot bad"></span>service unreachable</span>`;
+  }
+}
+
+async function loadPlacements() {
+  try {
+    const data = await api('/show');
+    const players = data.players || {};
+    const names = Object.keys(players);
+    $('placements').innerHTML = names.length
+      ? names.map(n => {
+          const p = players[n];
+          const prov = p.provenance || {};
+          return `<div class="placement-card"><b>${n}</b> — ${p.spatial} • ${p.temporal} • ${p.reference}` +
+                 `<div class="meta">${prov.tier || ''}${prov.method ? ' · via ' + prov.method : ''}` +
+                 `${prov.date ? ' · ' + prov.date : ''}</div></div>`;
+        }).join('')
+      : '<span style="color:var(--muted)">None yet — declare one on the left.</span>';
+    const opts = names.map(n => `<option>${n}</option>`).join('');
+    $('r-a').innerHTML = opts; $('r-b').innerHTML = opts;
+    if (names.length > 1) $('r-b').selectedIndex = 1;
+  } catch (e) {
+    $('placements').innerHTML = `<span style="color:var(--bad)">${e.message}</span>`;
+  }
+}
+
+async function declarePlacement() {
+  clearMsg('d-msg');
+  const player = $('d-player').value.trim();
+  if (!player) { showMsg('d-msg', 'Player name is required.', false); return; }
+  $('d-btn').disabled = true;
+  try {
+    await api('/declare', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        player,
+        spatial: $('d-spatial').value, temporal: $('d-temporal').value,
+        reference: $('d-reference').value, method: $('d-method').value,
+        tier: $('d-tier').value, domains: $('d-domains').value,
+        date: $('d-date').value, declared_by: $('d-by').value,
+      }),
+    });
+    showMsg('d-msg', `Declared: ${player}`, true);
+    $('d-player').value = '';
+    loadPlacements();
+  } catch (e) { showMsg('d-msg', e.message, false); }
+  $('d-btn').disabled = false;
+}
+
+async function runRead() {
+  clearMsg('r-msg'); clearMsg('log-msg');
+  $('read-output').style.display = 'none';
+  $('log-btn').style.display = 'none';
+  const a = $('r-a').value, b = $('r-b').value;
+  const conditions = $('r-conditions').value.trim();
+  if (!a || !b) { showMsg('r-msg', 'Declare at least two placements first.', false); return; }
+  if (a === b)  { showMsg('r-msg', 'Pick two different players.', false); return; }
+  if (!conditions) { showMsg('r-msg', 'Conditions are required (live surface / weather).', false); return; }
+  $('r-btn').disabled = true; $('r-spin').style.display = 'block';
+  try {
+    const res = await api('/read', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        player_a: a, player_b: b, conditions,
+        intake: $('r-intake').value || null,
+        score: $('r-score').value || null,
+        with_market: $('r-market').checked,
+      }),
+    });
+    $('read-output').textContent = res.read;
+    $('read-output').style.display = 'block';
+    $('log-btn').style.display = 'inline-block';
+  } catch (e) { showMsg('r-msg', e.message, false); }
+  $('r-btn').disabled = false; $('r-spin').style.display = 'none';
+}
+
+async function logIt() {
+  clearMsg('log-msg');
+  const note = prompt('Optional note for the tracker:', '') ?? '';
+  try {
+    await api('/log', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note }),
+    });
+    showMsg('log-msg', 'Logged to the tracker.', true);
+  } catch (e) { showMsg('log-msg', e.message, false); }
+}
+
+loadHealth(); loadPlacements();
+</script>
+</body>
+</html>
