@@ -1,5 +1,33 @@
 {
   "players": {
+    "Alexandra Eala": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Other",
+      "spatial": "Abstract",
+      "temporal": "Future"
+    },
+    "Iva Jovic": {
+      "provenance": {
+        "date": "2026-06-10",
+        "declared_by": "Robert",
+        "domains": [
+          "tactical"
+        ],
+        "method": "user-declared",
+        "tier": "DECLARED"
+      },
+      "reference": "Self",
+      "spatial": "Concrete",
+      "temporal": "Past"
+    },
     "Kamil Majchrzak": {
       "provenance": {
         "date": "2026-06-06",
