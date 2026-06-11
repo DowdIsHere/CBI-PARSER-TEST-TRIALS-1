@@ -159,8 +159,9 @@ function clearMsg(id) { $(id).className = 'msg'; }
 
 async function api(path, opts) {
   const res = await fetch(path, opts);
+  const text = await res.text();
   let body;
-  try { body = await res.json(); } catch { body = { detail: await res.text() }; }
+  try { body = JSON.parse(text); } catch { body = { detail: text }; }
   if (!res.ok) throw new Error(body.detail || ('HTTP ' + res.status));
   return body;
 }
