@@ -181,11 +181,20 @@ def read(req: ReadRequest):
         current = (int(pairs[-1][0]), int(pairs[-1][1])) if pairs else None
         live_frame = LiveFrame(description=req.score, current_set_games=current)
 
-    engine = ReadEngine(
-        root=ROOT,
-        store=store,
-        model=AnthropicAdapter(model=req.model),
-    )
+    try:
+        engine = ReadEngine(
+            root=ROOT,
+            store=store,
+            model=AnthropicAdapter(model=req.model),
+        )
+    except (ValueError, FileNotFoundError) as e:
+        raise HTTPException(status_code=500, detail=f"Engine init failed: {e}")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Engine init error ({type(e).__name__}): {e}",
+        )
+
     try:
         result = engine.run_read(
             player_a=req.player_a,
@@ -197,6 +206,11 @@ def read(req: ReadRequest):
         )
     except MissingParserError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Read failed ({type(e).__name__}): {e}",
+        )
 
     if result.status == "uncertain":
         raise HTTPException(status_code=503, detail=result.text)
